@@ -2,6 +2,8 @@
 
 (define PI 3.1415926535897932384)
 
+(define seed (make-random-state #t))
+
 (define (print-html-canvas-header width height)
   (format #t "<!DOCTYPE html>~%")
   (format #t "<html>~%")
@@ -22,6 +24,19 @@
 (define (line-to x y)
   (format #t "  ctx.lineTo(~A, ~A);~%" x y))
 
+(define (draw-triangle x y angle unit)
+  (let* ((half (/ unit 2.0))
+         (xM (+ x (* (cos angle) half)))
+         (yM (- y (* (sin angle) half)))
+         (alpha (- angle (+ (/ PI 12.0) (random PI seed))))
+         (xN (+ xM (* (cos alpha) half)))
+         (yN (+ yM (* (sin alpha) half))))
+    (begin
+      (move-to x y)
+      (line-to (+ x (* (cos angle) unit)) (- y (* (sin angle) unit)))
+      (line-to xN yN)
+      (line-to x y))))
+
 (define (draw-square x y angle unit)
   (let ((alpha (+ angle (/ PI 4.0)))
         (vert  (+ angle (/ PI 2.0)))
@@ -33,11 +48,19 @@
     (line-to (+ x (* (cos vert) unit)) (- y (* (sin vert) unit)))
     (line-to x y))))
 
+(define (draw-square-and-triangle x y angle unit)
+  (let* ((vert (+ angle (/ PI 2.0)))
+         (xT (+ x (* (cos vert) unit)))
+         (yT (- y (* (sin vert) unit))))
+    (begin
+      (draw-square x y angle unit)
+      (draw-triangle xT yT angle unit))))
+
 (define (print-html-canvas)
   (begin
   (print-html-canvas-header 1000 1000)
   (format #t "  ctx.beginPath();~%")
-  (draw-square 500.0 1000.0 (/ PI 48.0) 300.0)
+  (draw-square-and-triangle 500.0 1000.0 (/ PI 48.0) 300.0)
   (format #t "  ctx.stroke();~%")
   (print-html-canvas-footer)))
 
