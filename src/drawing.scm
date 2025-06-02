@@ -6,6 +6,43 @@
 
 (define seed (make-random-state #t))
 
+(define (point x y)
+  (cons x y))
+
+(define  (point-x p)
+  (car p))
+
+(define (point-y p)
+  (cdr p))
+
+(define (norm p)
+  (sqrt (+ (square (point-x p)) (square (point-y p)))))
+
+(define (normed-vector v)
+  (let ((n (norm v)))
+    (point (/ (point-x v) n) (/ (point-y v) n))))
+
+(define (dot-product v w)
+  (+ (* (point-x v) (point-x w)) (* (point-y v) (point-y w))))
+
+(define (cross-product v w)
+  (- (* (point-x v) (point-y w)) (* (point-y v) (point-x w))))
+
+(define (compute-angle s1 s2)
+  (let* ((n1 (normed-vector s1))
+         (n2 (normed-vector s2))
+         (cos-angle (dot-product n1 n2))
+         (d (cross-product n1 n2))
+         (angle (acos cos-angle)))
+    (if (<= d 0)
+      (- angle)
+      angle)))
+
+(define (print-angle a)
+  (begin
+    (display (/ (* a 180.0) PI))
+    (newline)))
+
 (define (r x)
   (begin
     (format #t "// ~A ~%" x)
@@ -92,6 +129,18 @@
 
 (define (main)
   (begin
-    (print-html-canvas)
+    (let ((p (point 5 5))
+          (q (point 5 0)))
+      (print-angle (compute-angle p q)))
+    (let ((p (point 2 4))
+          (q (point 4 2)))
+      (print-angle (compute-angle p q)))
+    (let ((p (point 1 0))
+          (q (point 10 0)))
+      (print-angle (compute-angle p q)))
+    (let ((p (point 0 10))
+          (q (point (- 10) 0)))
+      (print-angle (compute-angle p q)))
+;    (print-html-canvas)
     (exit)))
 
