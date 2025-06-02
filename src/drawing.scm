@@ -1,5 +1,7 @@
 (load-option 'format)
 
+(define MINIMAL 50.0)
+
 (define PI 3.1415926535897932384)
 
 (define seed (make-random-state #t))
@@ -43,6 +45,9 @@
 (define (choose a b)
   (+ a (random (- b a) seed)))
 
+(define (angle-mesure a b c)
+  (acos (/ (sqrt (+ (square a) (square b) (- (square c)))) (* 2 a b))))
+
 (define (draw-squares x y angle unit)
   (let* ((vert (+ angle (/ PI 2.0)))
          (x-upper-left (+ x (* (cos vert) unit)))
@@ -50,24 +55,22 @@
          (x-upper-right (+ x-upper-left (* (cos angle) unit)))
          (y-upper-right (- y-upper-left (* (sin angle) unit)))
          (alpha (choose (/ PI 6.0) (/ PI 1.2)))
+         (left-unit (* unit (choose 0.4 0.9)))
          (angle-prime (+ angle (/ alpha 2.0)))
-         (angle-second (- angle-prime (/ PI 2.0)))
-         (half-unit (/ unit 2.0))
-         (x-middle (+ x-upper-left (* (cos angle) half-unit)))
-         (y-middle (- y-upper-left (* (sin angle) half-unit)))
-         (x-top (+ x-middle (* (cos (+ angle alpha)) half-unit)))
-         (y-top (- y-middle (* (sin (+ angle alpha)) half-unit)))
-         (unit-prime (distance x-upper-left y-upper-left x-top y-top))
-         (unit-second (distance x-top y-top x-upper-right y-upper-right)))
+         (x-top (+ x-upper-left (* (cos angle-prime) left-unit)))
+         (y-top (+ y-upper-left (* (sin angle-prime) left-unit)))
+         (right-unit (distance x-top y-top x-upper-right y-upper-right))
+         (beta (angle-mesure left-unit right-unit unit))
+         (angle-second (+ angle beta)))
     ; h² = a² + o² → o² = h² - a² → o = √(h²-a²)
 
     (cond
-      ((> unit 4.0)
+      ((> unit MINIMAL)
        (begin
+         (format #t "// ~A  ~A  ~A  ~A ~%" x y angle unit)
          (draw-square x y angle unit)
-         (move-to x-upper-left y-upper-left)
-         (draw-squares x-upper-left y-upper-left angle-prime unit-prime)
-         (draw-squares x-top y-top angle-second unit-second) 
+         (draw-squares x-upper-left y-upper-left angle-prime left-unit)
+         (draw-squares x-top y-top angle-second right-unit) 
          ))
       (else ()))))
 
