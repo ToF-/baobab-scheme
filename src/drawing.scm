@@ -7,7 +7,9 @@
 (define seed (make-random-state #t))
 
 (define (r x)
-  (/ (round (* 10000.0 x)) 10000.0))
+  (begin
+    (format #t "// ~A ~%" x)
+    (/ (round (* 10000.0 x)) 10000.0)))
 
 (define (print-html-canvas-header width height)
   (format #t "<!DOCTYPE html>~%")
