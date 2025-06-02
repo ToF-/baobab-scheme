@@ -6,6 +6,9 @@
 
 (define seed (make-random-state #t))
 
+(define (r x)
+  (/ (round (* 10000.0 x)) 10000.0))
+
 (define (print-html-canvas-header width height)
   (format #t "<!DOCTYPE html>~%")
   (format #t "<html>~%")
@@ -21,10 +24,10 @@
   (format #t "</html>~%")))
 
 (define (move-to x y)
-  (format #t "  ctx.moveTo(~A, ~A);~%" x y))
+  (format #t "  ctx.moveTo(~A, ~A);~%"  (r x) (r y)))
 
 (define (line-to x y)
-  (format #t "  ctx.lineTo(~A, ~A);~%" x y))
+  (format #t "  ctx.lineTo(~A, ~A);~%" (r x) (r y)))
 
 (define (draw-square x y angle unit)
   (let ((alpha (+ angle (/ PI 4.0)))
@@ -45,8 +48,11 @@
 (define (choose a b)
   (+ a (random (- b a) seed)))
 
-(define (angle-mesure a b c)
-  (acos (/ (sqrt (+ (square a) (square b) (- (square c)))) (* 2 a b))))
+(define (angle-m a b c)
+  (let ((result (acos (/ (sqrt (+ (square a) (square b) (- (square c)))) (* 2 a b)))))
+    (begin
+      (format #t "// angle-m ~A ~A ~A → ~A ~%" a b c result)
+      result)))
 
 (define (draw-squares x y angle unit)
   (let* ((vert (+ angle (/ PI 2.0)))
@@ -60,7 +66,7 @@
          (x-top (+ x-upper-left (* (cos angle-prime) left-unit)))
          (y-top (+ y-upper-left (* (sin angle-prime) left-unit)))
          (right-unit (distance x-top y-top x-upper-right y-upper-right))
-         (beta (angle-mesure left-unit right-unit unit))
+         (beta (angle-m left-unit right-unit unit))
          (angle-second (+ angle beta)))
     ; h² = a² + o² → o² = h² - a² → o = √(h²-a²)
 
