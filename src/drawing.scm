@@ -35,6 +35,18 @@
     (* (acos (dot-product n m))
         (if (<= (cross-product n m) 0) (- 1.0) 1.0))))
 
+(define (normal-angle a)
+  (if (< a 0.0)
+        (normal-angle (+ a (* 2 PI)))
+        a))
+
+(define (angle-oriented ac ab ax)
+  (let* ((abc (compute-angle ab ac))
+         (abx (compute-angle ab ax)))
+    (if (< abx 0)
+      (normal-angle (- abc))
+      (normal-angle abc))))
+
 (define (print-angle a)
   (begin
     (display (/ (* a 180.0) PI))
@@ -97,10 +109,10 @@
          (m (+ a (choose (/ PI 6.0) (/ PI 3.0))))
          (ll (* l (choose 0.4 0.9)))
          (t (point (+ (x ul) (* (cos m) ll)) (+ (y ul) (* (sin m) ll))))
-         (n (compute-angle p ul))
+         (n (angle-oriented ur t ul))
          (lr (distance t ur)))
     (begin
-      (format #t "// a: ~A p:~A  ul:~A  ur:~A  m:~A  ll:~A  t:~A  n:~A  lr:~A ~%" (deg a) p ul ur (deg m) ll t (deg n) lr)
+      (format #t "// a: ~A m:~A n:~A ~%" (rounded (deg a)) (rounded (deg m)) (rounded (deg n)))
       (draw-square p a l)
       (draw-square ul m ll)
       (draw-square t n lr)
