@@ -16,33 +16,38 @@
 (define (y p)
   (cdr p))
 
-(define (norm p)
-  (sqrt (+ (square (x p)) (square (y p)))))
-
-(define (normed-vector v)
-  (let ((n (norm v)))
-    (point (/ (x v) n) (/ (y v) n))))
-
-(define (dot-product v w)
-  (+ (* (x v) (x w)) (* (y v) (y w))))
-
-(define (cross-product v w)
-  (- (* (x v) (y w)) (* (y v) (x w))))
-
-(define (compute-angle a b)
-  (let ((n (normed-vector a))
-        (m (normed-vector b)))
-    (* (acos (dot-product n m))
-        (if (<= (cross-product n m) 0) (- 1.0) 1.0))))
-
-(define (normal-angle a)
-  (if (< a 0.0)
-        (normal-angle (+ a (* 2 PI)))
-        a))
-
 (define (angle-oriented ac ab ax)
-  (let* ((abc (compute-angle ab ac))
-         (abx (compute-angle ab ax)))
+  (let* (
+         (norm (lambda (p)
+                 (sqrt (+ (square (x p)) (square (y p))))))
+
+         (dot-product (lambda (v w)
+                        (+ (* (x v) (x w)) (* (y v) (y w)))))
+
+         (cross-product (lambda (v w)
+                     (- (* (x v) (y w)) (* (y v) (x w)))))
+
+         (normal-angle (lambda (a)
+                         (if (< a 0.0)
+                           (normal-angle (+ a (* 2 PI)))
+                           a)))
+
+         (normed-vector (lambda (v)
+                          (let ((n (norm v)))
+                            (point (/ (x v) n) (/ (y v) n)))))
+         (compute-angle (lambda (a b)
+                          (let ((n (normed-vector a))
+                                (m (normed-vector b)))
+                            (* (acos (dot-product n m))
+                               (if (<= (cross-product n m) 0) (- 1.0) 1.0)))))
+
+         (normal-angle (lambda (a)
+                         (if (< a 0.0)
+                           (normal-angle (+ a (* 2 PI)))
+                           a)))
+         (abc (compute-angle ab ac))
+         (abx (compute-angle ab ax))
+         )
     (if (< abx 0)
       (normal-angle (- abc))
       (normal-angle abc))))
@@ -62,8 +67,8 @@
   (format #t "<canvas id=\"c\" width=\"~A\" height=\"~A\"></canvas>~%" width height)
   (format #t "<script>~%")
   (format #t "  const ctx = document.getElementById('c').getContext('2d');~%"))
-
-(define (print-html-canvas-footer)
+(
+ define (print-html-canvas-footer)
   (begin 
   (format #t "</script>~%")
   (format #t "</body>~%")
@@ -74,20 +79,6 @@
 
 (define (line-to p)
   (format #t "  ctx.lineTo(~A, ~A);~%" (rounded (x p)) (- HEIGHT (rounded (y p)))))
-
-(define (draw-square p a l)
-  (let* ((q (point (+ (x p) (* (cos a) l)) (+ (y p) (* (sin a) l))))
-         (b (+ a (/ PI 4.0)))
-         (d (* (sqrt 2.0) l))
-         (r (point (+ (x p) (* (cos b) d)) (+ (y p) (* (sin b) d))))
-         (v (+ a (/ PI 2.0)))
-         (s (point (+ (x p) (* (cos v) l)) (+ (y p) (* (sin v) l)))))
-    (begin
-      (move-to p)
-      (line-to q)
-      (line-to r)
-      (line-to s)
-      (line-to p))))
 
 (define (distance p q)
   (let ((dx (- (x q) (x p)))
